@@ -83,7 +83,7 @@ def black_man():
 
     }
 
-    embed = DiscordEmbed(title=f"Valorant Acc Gen {Version}", description="Account generator INITIALIZED", color="4ddb00")
+    embed = DiscordEmbed(title=f"Valorant Acc Gen {Version}", description="Account generator INITIALIZED", color="056ded")
     embed.add_embed_field(name="Status", value=f"generating: `{Username}`")
     webhook.add_embed(embed)
     response = webhook.execute()
