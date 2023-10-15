@@ -35,6 +35,8 @@ Once you have completed the installation steps, you can start using the program.
 
 - python main.py
 
+*NOTE: YOU MAY HAVE TO CHANGE USERNAME EMAIL AND PASSWORD TO YOUR LIKING BY MODIFYING MAIN.PY TO DO THIS OPEN IT WITH NOTEPAD AND MODIFY THE STRINGS IN THE FUNCTIONS random_email, random_username and random_password.*
+
 2. **Access Credentials**: All necessary accounts and access credentials are saved in a text file. The program will prompt you to provide any required input, and you can refer to the text file for additional information.
 
 ## Contributing
