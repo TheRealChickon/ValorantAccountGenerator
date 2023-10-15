@@ -1,24 +1,16 @@
-print("V1.0 - made by @thetwoguy on dc")
-# Imports for white people
 import random
-import string
+from discord_webhook import DiscordWebhook, DiscordEmbed
+import undetected_chromedriver as uc
+from random_user_agent.params import SoftwareName, OperatingSystem
+from random_user_agent.user_agent import UserAgent
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from random_user_agent.user_agent import UserAgent
-from random_user_agent.params import SoftwareName, OperatingSystem
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.chrome.options import Options
-import undetected_chromedriver as uc
-import time
-import sys
+
+Version = "V1.1"
+print(f"{Version} - made by @thetwoguy on dc")
 
 software_names = [SoftwareName.CHROME.value]
 operating_systems = [OperatingSystem.WINDOWS.value]
@@ -36,26 +28,33 @@ driver = webdriver.Chrome()
 accountNumber = 1
 
 
-def randomEmail(nigga_email):
+def random_email(nigga_email):
     return 'samizerfaoui2'
 
 
-def randomUsername(nigga_username):
+def random_username(nigga_username):
     return 'ItzMeh' + str(random.randint(40, 1000))
 
 
-def randomPassword(nigga_password):
+def random_password(nigga_password):
     return 'Rz29#sa038173!'
 
 
 driver.close()
 
+webhook = DiscordWebhook(url="")
 
-def blackMan():
+def black_man():
+
+    embed = DiscordEmbed(title=f"Valorant Acc Gen {Version}", description="Account generator INITIALIZING", color="a89700")
+    embed.add_embed_field(name="Username", value="N/A")
+    webhook.add_embed(embed)
+    response = webhook.execute()
+
     timeout = 5
-    Email = randomEmail(14) + "@gmail.com"
-    Username = randomUsername(4)
-    Password = randomPassword(14)
+    Email = random_email(14) + "@gmail.com"
+    Username = random_username(5)
+    Password = random_password(14)
     DateOfWhite = random.choice(["07", "07"]) + "/" + random.choice(["12", "12"]) + "/" + random.choice(
         ["2005", "2005"])
     print(f"{Username} {Password}")
@@ -83,6 +82,11 @@ def blackMan():
         "acc-management": '/html/body/div[2]/div[1]/div[2]/div[1]/div/div[2]/h2'
 
     }
+
+    embed = DiscordEmbed(title=f"Valorant Acc Gen {Version}", description="Account generator INITIALIZED", color="4ddb00")
+    embed.add_embed_field(name="Status", value=f"generating: {Username}")
+    webhook.add_embed(embed)
+    response = webhook.execute()
 
     signINCheck = EC.presence_of_element_located(
         (By.XPATH, values["sign_in_xpath"]))  # check for Sign In text
@@ -166,13 +170,23 @@ def blackMan():
         (By.XPATH, values["acc-management"]))  # check for When were you born? text
     try:
         WebDriverWait(driver, 100).until(doneCheck)
-        print("found, done")
+        embed = DiscordEmbed(title=f"Valorant Acc Gen {Version}", description="Account generator FINISHED",
+                             color="44c200")
+        embed.add_embed_field(name="Status", value=f"SUCCESSFULLY GENERATED: {Username}")
+        webhook.add_embed(embed)
+        response = webhook.execute()
         driver.close()
     except TimeoutException:
         print("TimeoutException occurred, either a captcha popped up or your internet is shit mf")
+        embed = DiscordEmbed(title=f"Valorant Acc Gen {Version}", description="Account generator NEEDS MAINTENANCE",
+                             color="850000")
+        embed.add_embed_field(name="Status", value=f"ERROR while generating: {Username}, Probably just a captcha")
+        embed.add_embed_field(name="Status", value=f"awaiting manual confirmation, please check your tab <@!802973364335280148>")
+        webhook.add_embed(embed)
+        response = webhook.execute()
+        input()
 
-
-blackMan()
+black_man()
 print("Thx for using the gen! you may exit or restart the program")
 while True:
-    input()
+    black_man()
