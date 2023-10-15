@@ -80,7 +80,7 @@ def blackMan():
         "choose_password": '/html/body/div[2]/div/div/div[2]/div/div[2]/form/div/div[1]/h5[1]',
         "password_xpath1": '/html/body/div[2]/div/div/div[2]/div/div[2]/form/div/div[2]/div/div[1]/div/input',
         "password_xpath2": '/html/body/div[2]/div/div/div[2]/div/div[2]/form/div/div[2]/div/div[3]/div/input',
-        "acc-management": '/html/body/div[2]/div[1]/div[1]/nav/div/h1'
+        "acc-management": '/html/body/div[2]/div[1]/div[2]/div[1]/div/div[2]/h2'
 
     }
 
@@ -175,4 +175,4 @@ def blackMan():
 blackMan()
 print("Thx for using the gen! you may exit or restart the program")
 while True:
-    blackMan()
+    input()
