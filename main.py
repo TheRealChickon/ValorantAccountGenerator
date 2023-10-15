@@ -167,9 +167,9 @@ def blackMan():
     try:
         WebDriverWait(driver, 100).until(doneCheck)
         print("found, done")
+        driver.close()
     except TimeoutException:
         print("TimeoutException occurred, either a captcha popped up or your internet is shit mf")
-        driver.close()
 
 
 blackMan()
