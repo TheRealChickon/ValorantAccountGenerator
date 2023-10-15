@@ -34,10 +34,6 @@ driver = webdriver.Chrome()
 
 accountNumber = 1
 
-
-
-
-
 driver.close()
 
 webhook = DiscordWebhook(
@@ -53,7 +49,6 @@ def black_man():
 
     def random_password(nigga_password):
         return 'Rz29#sa038173!'
-
 
     embed = DiscordEmbed(title=f"Valorant Acc Gen {Version}", description="Account generator INITIALIZING",
                          color="a89700")
