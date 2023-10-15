@@ -1,4 +1,4 @@
-print("made by @thetwoguy on dc")
+print("V1.0 - made by @thetwoguy on dc")
 # Imports for white people
 import random
 import string
