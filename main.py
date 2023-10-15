@@ -84,7 +84,7 @@ def black_man():
     }
 
     embed = DiscordEmbed(title=f"Valorant Acc Gen {Version}", description="Account generator INITIALIZED", color="4ddb00")
-    embed.add_embed_field(name="Status", value=f"generating: {Username}")
+    embed.add_embed_field(name="Status", value=f"generating: `{Username}`")
     webhook.add_embed(embed)
     response = webhook.execute()
 
@@ -172,7 +172,7 @@ def black_man():
         WebDriverWait(driver, 100).until(doneCheck)
         embed = DiscordEmbed(title=f"Valorant Acc Gen {Version}", description="Account generator FINISHED",
                              color="44c200")
-        embed.add_embed_field(name="Status", value=f"SUCCESSFULLY GENERATED: {Username}")
+        embed.add_embed_field(name="Status", value=f"SUCCESSFULLY GENERATED: `{Username}`")
         webhook.add_embed(embed)
         response = webhook.execute()
         driver.close()
