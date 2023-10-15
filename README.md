@@ -37,8 +37,6 @@ Once you have completed the installation steps, you can start using the program.
 
 2. **Access Credentials**: All necessary accounts and access credentials are saved in a text file. The program will prompt you to provide any required input, and you can refer to the text file for additional information.
 
-3. **Exploring the Program**: The program provides instructions and guidance on how to use its features. Please refer to the program's built-in help or documentation for more details.
-
 ## Contributing
 
 If you would like to contribute to this project, please follow these guidelines:
@@ -51,12 +49,8 @@ If you would like to contribute to this project, please follow these guidelines:
 
 ## License
 
-This project is licensed under the [License Name] - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the [GNU General Public License v3.0] - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-[Optional: Add any additional sections, badges, or acknowledgments as needed.]
-
-[Optional: Add contact information or ways to reach the project maintainers.]
-
-[Optional: Include any screenshots or diagrams that enhance the README.]
+Discord: @thetwoguy - Do not ask me for help
