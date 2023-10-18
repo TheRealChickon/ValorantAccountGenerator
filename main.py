@@ -33,11 +33,168 @@ webdriverOptions.add_argument(f'--user-agent="{user_agent}"')
 driver = webdriver.Chrome()
 
 accountNumber = 1
+Username = None
+Password = None
 
 driver.close()
 
+raw_webhook = "WEBHOOKHERE"
 webhook = DiscordWebhook(
-    url="https://discordapp.com/api/webhooks/1162984618149023755/YEyzjuomwQEIGarWpwzDfp0nFy0dgpsT2sCpfTUPyhP5lzB9L5DazB0wSSkaJvsZ6t8J")
+    url=raw_webhook)
+
+
+async def Auth(raw_webhook, Username, Password):
+    embed = DiscordEmbed(title=f"Valorant Acc Checker `{Version}`", description="Account Checker INITIALIZING",
+                         color="a89700")
+    embed.add_embed_field(name=f"`{Username}`", value="Skins: N/A")
+    webhook.add_embed(embed)
+    response = webhook.execute()
+    build = requests.get('https://valorant-api.com/v1/version').json()['data']['riotClientBuild']
+    print('Valorant Build ' + build)
+
+    RiotAuth.RIOT_CLIENT_USER_AGENT = build + '%s (Windows;10;;Professional, x64)'
+
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    CREDS = Username, Password
+
+    auth = RiotAuth()
+    try:
+        await auth.authorize(*CREDS)
+        embed = DiscordEmbed(title=f"Valorant Acc Gen `{Version}`", description="Account generator INITIALIZED",
+                             color="056ded")
+        embed.add_embed_field(name="Status", value=f"Checking: `{Username}`")
+        webhook.add_embed(embed)
+        response = webhook.execute()
+
+    except auth_exceptions.RiotAuthenticationError:
+        embed = DiscordEmbed(title=f"Valorant Acc Checker `{Version}`", description="Account Checker INITIALIZING",
+                             color="a89700")
+        embed.add_embed_field(name=f" {Username} Error: Auth Failed, Please check credentials and try again.",
+                              value="N/A")
+        webhook.add_embed(embed)
+        response = webhook.execute()
+        exit('Error: Auth Failed, Please check credentials and try again.')
+
+    except auth_exceptions.RiotMultifactorError:
+        embed = DiscordEmbed(title=f"Valorant Acc Checker `{Version}`", description="Account Checker INITIALIZING",
+                             color="a89700")
+        embed.add_embed_field(
+            name=f" `{Username}` Accounts with MultiFactor enabled are not supported at this time.",
+            value="N/A")
+        webhook.add_embed(embed)
+        response = webhook.execute()
+        exit('Accounts with MultiFactor enabled are not supported at this time.')
+
+    return auth
+
+async def store(raw_webhook, Username, Password):
+    auth = await Auth(raw_webhook, Username, Password)
+
+    region = 'eu'
+
+    token_type = auth.token_type
+    access_token = auth.access_token
+    entitlements_token = auth.entitlements_token
+    user_id = auth.user_id
+
+    conn = aiohttp.TCPConnector()
+    session = aiohttp.ClientSession(connector=conn)
+
+    headers = {
+        'X-Riot-Entitlements-JWT': entitlements_token,
+        'Authorization': 'Bearer ' + access_token,
+    }
+
+    async with session.get('https://pd.' + region + '.a.pvp.net/store/v1/offers/', headers=headers) as r:
+        pricedata = await r.json()
+
+    async with session.get('https://pd.' + region + '.a.pvp.net/store/v2/storefront/' + user_id,
+                           headers=headers) as r:
+        data = json.loads(await r.text())
+    allstore = data.get('SkinsPanelLayout')
+    singleitems = allstore["SingleItemOffers"]
+    skin1uuid = singleitems[0]
+    skin2uuid = singleitems[1]
+    skin3uuid = singleitems[2]
+    skin4uuid = singleitems[3]
+
+    async with session.get('https://valorant-api.com/v1/weapons/skinlevels/' + skin1uuid) as r:
+        skin1 = json.loads(await r.text())['data']['displayName']
+
+    async with session.get('https://valorant-api.com/v1/weapons/skinlevels/' + skin2uuid) as r:
+        skin2 = json.loads(await r.text())['data']['displayName']
+
+    async with session.get('https://valorant-api.com/v1/weapons/skinlevels/' + skin3uuid) as r:
+        skin3 = json.loads(await r.text())['data']['displayName']
+
+    async with session.get('https://valorant-api.com/v1/weapons/skinlevels/' + skin4uuid) as r:
+        skin4 = json.loads(await r.text())['data']['displayName']
+
+    def getprice(uuid):
+        for item in pricedata['Offers']:
+            if item["OfferID"] == uuid:
+                return item['Cost']['85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741']
+
+    def nightmarket(datad):
+        out = []
+        try:
+            for item in datad["BonusStore"]["BonusStoreOffers"]:
+                r = requests.get(
+                    f'https://valorant-api.com/v1/weapons/skinlevels/' + item['Offer']['Rewards'][0]['ItemID'])
+                skin = r.json()
+                data = {
+                    'name': skin['data']['displayName'],
+                    'uuid': item['Offer']['OfferID'],
+                    'price': {
+                        'oringinal': item['Offer']['Cost']['85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741'],
+                        'discount': item['DiscountPercent'],
+                        'final': item['DiscountCosts']['85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741'],
+                    }
+                }
+                out.append(data)
+            return out
+        except KeyError:
+            return None
+
+    ms_text = """
+    Store:""".center(cw)
+    print(ms_text)
+    print(f"""
+  {skin1} for {getprice(skin1uuid)}
+  {skin2} for {getprice(skin2uuid)}
+  {skin3} for {getprice(skin3uuid)}
+  {skin4} for {getprice(skin4uuid)}
+  """)
+    embed = DiscordEmbed(title=f"Valorant Acc Gen {Version}", description="Account CHECKER FINISHED",
+                         color="44c200")
+    embed.add_embed_field(name="Status", value=f"SUCCESSFULLY CHECKED: `{Username}`")
+    embed.add_embed_field(name="Main Shop", value=f"""
+      `{skin1} for {getprice(skin1uuid)}`
+      `{skin2} for {getprice(skin2uuid)}`
+      `{skin3} for {getprice(skin3uuid)}`
+      `{skin4} for {getprice(skin4uuid)}`
+    """)
+    nm = nightmarket(data)
+    if nm != None:
+        nm_text = """
+      Night Market                                                                                  
+    """.center(cw)
+        print(nm_text)
+        nm_items = []
+
+        for item in nm:
+            nmitem_text = f"`{item['name']}` for `{item['price']['final']}` \n Original Price: {item['price']['oringinal']}\n Discount: `{item['price']['discount']}%`\n"
+            nm_items.append(nmitem_text)
+
+        embed.add_embed_field(name="Nightmarket", value=''.join(nm_items))
+        print(''.join(nm_items))
+    webhook.add_embed(embed)
+
+    response = webhook.execute()
+
+    await session.close()
 
 
 def black_man():
@@ -66,159 +223,6 @@ def black_man():
     options = uc.ChromeOptions()
     options.headless = False
     driver = uc.Chrome(use_subprocess=True, options=options)
-
-    async def Auth():
-        embed = DiscordEmbed(title=f"Valorant Acc Checker `{Version}`", description="Account Checker INITIALIZING",
-                             color="a89700")
-        embed.add_embed_field(name=f"`{Username}`", value="Skins: N/A")
-        webhook.add_embed(embed)
-        response = webhook.execute()
-        build = requests.get('https://valorant-api.com/v1/version').json()['data']['riotClientBuild']
-        print('Valorant Build ' + build)
-
-        RiotAuth.RIOT_CLIENT_USER_AGENT = build + '%s (Windows;10;;Professional, x64)'
-
-        if sys.platform == "win32":
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-        CREDS = Username, Password
-
-        auth = RiotAuth()
-        try:
-            await auth.authorize(*CREDS)
-            embed = DiscordEmbed(title=f"Valorant Acc Gen `{Version}`", description="Account generator INITIALIZED",
-                                 color="056ded")
-            embed.add_embed_field(name="Status", value=f"Checking: `{Username}`")
-            webhook.add_embed(embed)
-            response = webhook.execute()
-
-        except auth_exceptions.RiotAuthenticationError:
-            embed = DiscordEmbed(title=f"Valorant Acc Checker `{Version}`", description="Account Checker INITIALIZING",
-                                 color="a89700")
-            embed.add_embed_field(name=f" {Username} Error: Auth Failed, Please check credentials and try again.",
-                                  value="N/A")
-            webhook.add_embed(embed)
-            response = webhook.execute()
-            exit('Error: Auth Failed, Please check credentials and try again.')
-
-        except auth_exceptions.RiotMultifactorError:
-            embed = DiscordEmbed(title=f"Valorant Acc Checker `{Version}`", description="Account Checker INITIALIZING",
-                                 color="a89700")
-            embed.add_embed_field(
-                name=f" `{Username}` Accounts with MultiFactor enabled are not supported at this time.",
-                value="N/A")
-            webhook.add_embed(embed)
-            response = webhook.execute()
-            exit('Accounts with MultiFactor enabled are not supported at this time.')
-
-        return auth
-
-    async def store():
-        auth = await Auth()
-
-        region = 'eu'
-
-        token_type = auth.token_type
-        access_token = auth.access_token
-        entitlements_token = auth.entitlements_token
-        user_id = auth.user_id
-
-        conn = aiohttp.TCPConnector()
-        session = aiohttp.ClientSession(connector=conn)
-
-        headers = {
-            'X-Riot-Entitlements-JWT': entitlements_token,
-            'Authorization': 'Bearer ' + access_token,
-        }
-
-        async with session.get('https://pd.' + region + '.a.pvp.net/store/v1/offers/', headers=headers) as r:
-            pricedata = await r.json()
-
-        async with session.get('https://pd.' + region + '.a.pvp.net/store/v2/storefront/' + user_id,
-                               headers=headers) as r:
-            data = json.loads(await r.text())
-        allstore = data.get('SkinsPanelLayout')
-        singleitems = allstore["SingleItemOffers"]
-        skin1uuid = singleitems[0]
-        skin2uuid = singleitems[1]
-        skin3uuid = singleitems[2]
-        skin4uuid = singleitems[3]
-
-        async with session.get('https://valorant-api.com/v1/weapons/skinlevels/' + skin1uuid) as r:
-            skin1 = json.loads(await r.text())['data']['displayName']
-
-        async with session.get('https://valorant-api.com/v1/weapons/skinlevels/' + skin2uuid) as r:
-            skin2 = json.loads(await r.text())['data']['displayName']
-
-        async with session.get('https://valorant-api.com/v1/weapons/skinlevels/' + skin3uuid) as r:
-            skin3 = json.loads(await r.text())['data']['displayName']
-
-        async with session.get('https://valorant-api.com/v1/weapons/skinlevels/' + skin4uuid) as r:
-            skin4 = json.loads(await r.text())['data']['displayName']
-
-        def getprice(uuid):
-            for item in pricedata['Offers']:
-                if item["OfferID"] == uuid:
-                    return item['Cost']['85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741']
-
-        def nightmarket(datad):
-            out = []
-            try:
-                for item in datad["BonusStore"]["BonusStoreOffers"]:
-                    r = requests.get(
-                        f'https://valorant-api.com/v1/weapons/skinlevels/' + item['Offer']['Rewards'][0]['ItemID'])
-                    skin = r.json()
-                    data = {
-                        'name': skin['data']['displayName'],
-                        'uuid': item['Offer']['OfferID'],
-                        'price': {
-                            'oringinal': item['Offer']['Cost']['85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741'],
-                            'discount': item['DiscountPercent'],
-                            'final': item['DiscountCosts']['85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741'],
-                        }
-                    }
-                    out.append(data)
-                return out
-            except KeyError:
-                return None
-
-        ms_text = """
-        Store:""".center(cw)
-        print(ms_text)
-        print(f"""
-      {skin1} for {getprice(skin1uuid)}
-      {skin2} for {getprice(skin2uuid)}
-      {skin3} for {getprice(skin3uuid)}
-      {skin4} for {getprice(skin4uuid)}
-      """)
-        embed = DiscordEmbed(title=f"Valorant Acc Gen {Version}", description="Account CHECKER FINISHED",
-                             color="44c200")
-        embed.add_embed_field(name="Status", value=f"SUCCESSFULLY CHECKED: `{Username}`")
-        embed.add_embed_field(name="Main Shop", value=f"""
-          `{skin1} for {getprice(skin1uuid)}`
-          `{skin2} for {getprice(skin2uuid)}`
-          `{skin3} for {getprice(skin3uuid)}`
-          `{skin4} for {getprice(skin4uuid)}`
-        """)
-        nm = nightmarket(data)
-        if nm != None:
-            nm_text = """
-          Night Market                                                                                  
-        """.center(cw)
-            print(nm_text)
-            nm_items = []
-
-            for item in nm:
-                nmitem_text = f"{item['name']} for {item['price']['final']} ({item['price']['oringinal']} with {item['price']['discount']}% discount) \n"
-                nm_items.append(nmitem_text)
-
-            embed.add_embed_field(name="Nightmarket", value="```" + ''.join(nm_items) + "```")
-            print(''.join(nm_items))
-        webhook.add_embed(embed)
-
-        response = webhook.execute()
-
-        await session.close()
 
     driver.get("https://account.riotgames.com/")
     f = open('accountsforwhitepeople.txt', 'a')
@@ -335,7 +339,7 @@ def black_man():
         embed.add_embed_field(name="Status", value=f"SUCCESSFULLY GENERATED: `{Username}`")
         webhook.add_embed(embed)
         response = webhook.execute()
-        asyncio.run(store())
+        asyncio.run(store(raw_webhook, Username, Password))
         driver.close()
     except TimeoutException:
         print("TimeoutException occurred, either a captcha popped up or your internet is shit mf")
@@ -346,10 +350,11 @@ def black_man():
                               value=f"awaiting manual confirmation, please check your tab <@!802973364335280148>")
         webhook.add_embed(embed)
         response = webhook.execute()
+
+        asyncio.run(store(raw_webhook, Username, Password))
         input()
 
 
 black_man()
-print("Thx for using the gen! you may exit or restart the program")
 while True:
     black_man()
