@@ -16,7 +16,7 @@ import asyncio
 from riot_auth import RiotAuth, auth_exceptions
 
 cw = shutil.get_terminal_size().columns
-Version = "V1.1"
+Version = "V1.2"
 print(f"{Version} - made by @thetwoguy on dc")
 
 software_names = [SoftwareName.CHROME.value]
@@ -38,7 +38,7 @@ Password = None
 
 driver.close()
 
-raw_webhook = "WEBHOOKHERE"
+raw_webhook = ""
 webhook = DiscordWebhook(
     url=raw_webhook)
 
@@ -185,7 +185,7 @@ async def store(raw_webhook, Username, Password):
         nm_items = []
 
         for item in nm:
-            nmitem_text = f"`{item['name']}` for `{item['price']['final']}` \n Original Price: {item['price']['oringinal']}\n Discount: `{item['price']['discount']}%`\n"
+            nmitem_text = f"```{item['name']}``` for `{item['price']['final']}` \n Original Price: {item['price']['oringinal']}\n Discount: `{item['price']['discount']}%`\n"
             nm_items.append(nmitem_text)
 
         embed.add_embed_field(name="Nightmarket", value=''.join(nm_items))
