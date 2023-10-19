@@ -11,6 +11,7 @@
 
 To get started with this project, follow these steps:
 
+0. **Install Selenium Chromedriver** and put it in the folder "C:/" Video here: https://www.youtube.com/watch?v=dz59GsdvUF8&t=0s
 1. **Install Python**: This project was tested with Python version 3.9. If you don't have Python 3.9 installed, you can download it from the official [Python website](https://www.python.org/downloads/).
 
 2. **Adding Python to PATH**: Make sure that Python is added to your system's PATH so you can run Python commands from your command prompt. To do this, follow the instructions specific to your operating system:
